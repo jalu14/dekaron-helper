@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "dayjs": "^1.11.6",
+    "imask": "^6.4.3",
     "solid-js": "^1.5.1"
   }
 }

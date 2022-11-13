@@ -1,6 +1,7 @@
 import { Component, createSignal, For, onCleanup, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import dayjs from "dayjs";
+import IMask from 'imask'; // imports all modules
+import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(utc);
@@ -89,6 +90,8 @@ function Clock() {
 function BossCard({ boss, markBossSlain }: { boss: Boss, markBossSlain: Function }) {
     const [pickerOpen, setPickerOpen] = createSignal(false);
 
+    let firstOpen: boolean = false;
+
     function updateBossTime() {
         let timeInput: string | undefined;
         let inputElement = document.getElementById(boss.name);
@@ -110,6 +113,14 @@ function BossCard({ boss, markBossSlain }: { boss: Boss, markBossSlain: Function
     function toggleDatePicker() {
         setPickerOpen(!pickerOpen());
         if (pickerOpen()) {
+            if (!firstOpen) {
+                firstOpen = true;
+                var element = document.getElementById(boss.name);
+
+                IMask(element, {
+                    mask: '00/00/0000 00:00'
+                });
+            }
             setTimeout(() => {
                 document.getElementById(boss.name)?.focus();
             }, 50);
@@ -152,9 +163,15 @@ function BossCard({ boss, markBossSlain }: { boss: Boss, markBossSlain: Function
                     <i class="bx bxs-alarm"></i>
                 </button>
                 <Show when={pickerOpen()}>
-                    <div class="z-10 absolute right-0 top-9 flex flex-col bg-slate-600 p-3 rounded-md shadow-lg">
-                        <label for="time">(dd/mm/yyyy hh:mm:ss)</label>
-                        <input id={boss.name} class="bg-slate-700 rounded-sm px-2 py-1" value={dayjs(boss.lastKill).format('DD/MM/YYYY HH:mm')} onKeyDown={(e) => e.key === "Enter" && updateBossTime()} />
+                    <div class="z-10 absolute right-0 top-16 flex flex-col bg-slate-600 p-3 rounded-md shadow-lg">
+                        <label for="time" class="text-slate-900">dd/mm/yyyy hh:mm</label>
+                        <input
+                            id={boss.name}
+                            type="string"
+                            class="bg-slate-700 rounded-md px-3 py-2 shadow-sm focus:outline-none"
+                            placeholder={dayjs().format('DD/MM/YYYY HH:mm')}
+                            value={dayjs(boss.lastKill).format('DD/MM/YYYY HH:mm')}
+                            onKeyDown={(e) => e.key === "Enter" && updateBossTime()} />
                         <div class="flex justify-end">
                             <button class=" bg-slate-700 ml-2 px-3 py-1 rounded-lg mt-2" onClick={() => updateBossTime()}>
                                 <i class="bx bx-check"></i>

@@ -1,7 +1,7 @@
-import { Component, createSignal, For, onCleanup, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import IMask from 'imask'; // imports all modules
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(utc);
@@ -15,6 +15,8 @@ interface Boss extends BossModel {
 }
 
 export const BossTracker: Component = () => {
+
+    let playingSound: boolean = false;
 
     let storage: {
         [key: string]: any,
@@ -36,6 +38,7 @@ export const BossTracker: Component = () => {
         while (remaining < -300) {
             remaining = remaining + boss.respawn * 60 * 60
         }
+        if (remaining === 60) playAlarm();
         setState('bosses', [index], 'remaining', remaining);
     }
 
@@ -46,6 +49,18 @@ export const BossTracker: Component = () => {
         let stateCopy = JSON.parse(JSON.stringify(state));
         stateCopy.bosses.forEach(b => delete b.remaining);
         localStorage.setItem('dekaron-helper', JSON.stringify(stateCopy));
+    }
+
+    function playAlarm() {
+        if (playingSound) return;
+        let audioSource = document.getElementById('alarm');
+        if (audioSource instanceof HTMLAudioElement) {
+            playingSound = true;
+            audioSource.play();
+            setTimeout(() => {
+                playingSound = false;
+            }, 2000);
+        }
     }
 
     onCleanup(() => {
@@ -137,7 +152,8 @@ function BossCard({ boss, markBossSlain }: { boss: Boss, markBossSlain: Function
             </div>
 
             <div class="flex flex-col justify-end w-4/5 mt-3">
-                <div class={`flex items-center pb-1 ${boss.remaining < 60 * 2 && 'text-green-300'}`}>
+                <div 
+                class={`flex items-center pb-1 ${boss.remaining < 120 && 'text-green-300'} ${boss.remaining < 3600 && boss.remaining >= 120 && 'text-orange-300'}`}>
                     <Show when={!boss.lastKill}>
                         No recent kills
                     </Show>

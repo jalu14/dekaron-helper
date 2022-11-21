@@ -31,7 +31,7 @@ export const BossTracker: Component = () => {
     }, 100);
 
     let alarmInterval = setInterval(() => {
-        let bossSpawning = state.bosses.find(b => b.remaining < 120);
+        let bossSpawning = state.bosses.find(b => b.remaining < 120 && b.remaining > 0);
         if (bossSpawning) playAlarm();
     }, 1000 * 60);
 

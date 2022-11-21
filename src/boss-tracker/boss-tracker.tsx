@@ -30,6 +30,11 @@ export const BossTracker: Component = () => {
         state.bosses.forEach((b, i) => updateBossTimer(b, i));
     }, 100);
 
+    let alarmInterval = setInterval(() => {
+        let bossSpawning = state.bosses.find(b => b.remaining < 120);
+        if (bossSpawning) playAlarm();
+    }, 1000 * 60);
+
     function updateBossTimer(boss: Boss, index: number) {
         if (!boss.lastKill) return;
         let now = dayjs();
@@ -38,7 +43,6 @@ export const BossTracker: Component = () => {
         while (remaining < -300) {
             remaining = remaining + boss.respawn * 60 * 60
         }
-        if (remaining === 60) playAlarm();
         setState('bosses', [index], 'remaining', remaining);
     }
 
@@ -59,12 +63,13 @@ export const BossTracker: Component = () => {
             audioSource.play();
             setTimeout(() => {
                 playingSound = false;
-            }, 2000);
+            }, 1000 * 60);
         }
     }
 
     onCleanup(() => {
         clearInterval(bossInterval);
+        clearInterval(alarmInterval);
     });
 
     return (

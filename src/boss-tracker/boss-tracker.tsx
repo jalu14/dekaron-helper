@@ -36,7 +36,10 @@ export const BossTracker: Component = () => {
     }, 1000 * 60);
 
     function updateBossTimer(boss: Boss, index: number) {
-        if (!boss.lastKill) return;
+        if (!boss.lastKill) {
+            delete boss.remaining;
+            return;
+        }
         let now = dayjs();
         let diff = now.diff(dayjs(boss.lastKill), 'seconds');
         let remaining = boss.respawn * 60 * 60 - diff;
@@ -47,7 +50,6 @@ export const BossTracker: Component = () => {
     }
 
     function markBossSlain(index: number, time: string) {
-        if (!time) time = dayjs().format()
         setState('bosses', [index], 'lastKill', time);
 
         let stateCopy = JSON.parse(JSON.stringify(state));
@@ -118,7 +120,8 @@ function BossCard({ boss, markBossSlain }: { boss: Boss, markBossSlain: Function
         if (inputElement instanceof HTMLInputElement) timeInput = inputElement.value;
 
         if (!timeInput) {
-            alert('Introduce la hora a la que han matado al jefe');
+            markBossSlain();
+            setPickerOpen(false);
             return;
         }
         try {
